@@ -15,7 +15,8 @@ if "bases" not in st.session_state:
 if "message" not in st.session_state:
     st.session_state.message = ""
 
-batting = ["hit", "two_base", "three_base", "home_run", "out", "out", "out", "out", "out", "out"]
+batting = ["hit", "two_base", "three_base", "home_run", "out"]
+weights = [0.1, 0.1, 0.1, 0.1, 0.6]
 
 
 # -------------------------
@@ -70,9 +71,9 @@ def advance_runners(hit_type):
 # -------------------------
 # 打席ボタン
 # -------------------------
-if st.button("▶ 打席を実行する"):
-    result = random.choice(batting)
-    advance_runners(result)
+if st.button("▶ 打席に立つ"):
+    result = random.choices(batting, weights=weights, k=1)[0]
+    st.write(f"結果：{result}")
 
 # -------------------------
 # 状況表示
