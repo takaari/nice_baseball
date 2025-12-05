@@ -71,9 +71,9 @@ def advance_runners(hit_type):
 # -------------------------
 # 打席ボタン
 # -------------------------
-if st.button("▶ 打席に立つ"):
-    result = random.choices(batting, weights=weights, k=1)[0]
-    st.write(f"結果：{result}")
+if st.button("▶ 打席を実行する"):
+    result = random.choice(batting)
+    advance_runners(result)
 
 # -------------------------
 # 状況表示
@@ -106,3 +106,6 @@ if st.button("🔄 リセット"):
     st.session_state.runs = 0
     st.session_state.bases = [False, False, False]
     st.session_state.message = "リセットしました！"
+
+
+
