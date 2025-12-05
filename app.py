@@ -15,7 +15,7 @@ if "bases" not in st.session_state:
 if "message" not in st.session_state:
     st.session_state.message = ""
 
-batting = ["hit", "two_base", "three_base", "home_run", "out"]
+batting = ["hit", "two_base", "three_base", "home_run", "out", "out", "out", "out", "out", "out", "out", "out", "out", "out", "out"]
 
 
 # -------------------------
