@@ -15,7 +15,7 @@ if "bases" not in st.session_state:
 if "message" not in st.session_state:
     st.session_state.message = ""
 
-batting = ["hit", "two_base", "three_base", "home_run", "out", "out", "out", "out", "out", "out", "out", "out", "out", "out", "out"]
+batting = ["hit", "two_base", "three_base", "home_run", "out"]
 
 
 # -------------------------
@@ -25,6 +25,7 @@ def advance_runners(hit_type):
     bases = st.session_state.bases
     runs = 0
 
+    # アウト
     if hit_type == "out":
         st.session_state.outs += 1
         st.session_state.message = "アウト！"
@@ -32,25 +33,38 @@ def advance_runners(hit_type):
 
     # ホームラン
     if hit_type == "home_run":
-        runs = sum(bases) + 1  # ランナー分 + バッター
-        st.session_state.bases = [False, False, False]
-        st.session_state.message = f"ホームラン！{runs} 点入りました！"
+        runs = sum(bases) + 1   # ランナー + バッター
+        st.session_state.bases = [False, False, False]  # 塁を空にする
         st.session_state.runs += runs
+        st.session_state.message = f"ホームラン！ {runs} 点入りました！"
         return
 
-    # 単打・二塁打・三塁打用の進塁処理
+    # 単打・二塁打・三塁打
     shift = {"hit": 1, "two_base": 2, "three_base": 3}[hit_type]
 
-    for _ in range(shift):
-        # 三塁ランナーが返る
-        if bases[2]:
-            runs += 1
-        # 進塁
-        bases = [False] + bases[:2]
+    # 新しい塁情報を作る
+    new_bases = [False, False, False]
 
-    st.session_state.bases = bases
+    # ランナーを後ろから動かす（3塁 → 2塁 → 1塁）
+    for i in reversed(range(3)):
+        if bases[i]:
+            new_position = i + shift
+            if new_position >= 3:
+                runs += 1   # 返ってきた
+            else:
+                new_bases[new_position] = True
+
+    # バッターの位置
+    if shift == 1:
+        new_bases[0] = True
+    elif shift == 2:
+        new_bases[1] = True
+    elif shift == 3:
+        new_bases[2] = True
+
+    st.session_state.bases = new_bases
     st.session_state.runs += runs
-    st.session_state.message = f"{hit_type}！ {runs} 点追加されました。"
+    st.session_state.message = f"{hit_type}！ {runs} 点入りました。"
 
 
 # -------------------------
@@ -72,7 +86,7 @@ with col1:
     st.write(f"得点：{st.session_state.runs}")
 
 with col2:
-    st.write("塁状況：")
+    st.write("塁状況（True = ランナーあり）：")
     st.write(f"1塁：{st.session_state.bases[0]}")
     st.write(f"2塁：{st.session_state.bases[1]}")
     st.write(f"3塁：{st.session_state.bases[2]}")
