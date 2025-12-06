@@ -95,10 +95,13 @@ if st.session_state.outs >= 3:
 # --- スコアボードを横並び表示 ---
 st.markdown("### スコアボード")
 
-# 回の番号
 innings = [str(i+1) for i in range(9)]
 top_scores = st.session_state.scoreboard["top"]
 bottom_scores = st.session_state.scoreboard["bottom"]
+
+# 合計（R）
+top_total = sum(top_scores)
+bottom_total = sum(bottom_scores)
 
 html = """
 <style>
@@ -125,19 +128,21 @@ th {
 # 回の番号を横に並べる
 for inn in innings:
     html += f"<th>{inn}</th>"
-html += "</tr>"
+
+# R 列
+html += "<th>R</th></tr>"
 
 # 表
 html += "<tr><td>表</td>"
 for s in top_scores:
     html += f"<td>{s}</td>"
-html += "</tr>"
+html += f"<td><b>{top_total}</b></td></tr>"
 
 # 裏
 html += "<tr><td>裏</td>"
 for s in bottom_scores:
     html += f"<td>{s}</td>"
-html += "</tr>"
+html += f"<td><b>{bottom_total}</b></td></tr>"
 
 html += "</table>"
 
