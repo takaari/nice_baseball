@@ -1,19 +1,31 @@
 import streamlit as st
 import random
 
-# --- ここにバッティング確率をセット ---
-batting = ["hit", "two_base", "three_base", "home_run", "out"]
-weights = [0.1, 0.1, 0.1, 0.1, 0.6]
+
 
 # --- セッションステート初期化 ---
 if "outs" not in st.session_state:
     st.session_state.outs = 0
 if "bases" not in st.session_state:
     st.session_state.bases = [False, False, False]
-if "score" not in st.session_state:
-    st.session_state.score = 0
+if "inning" not in st.session_state:
+    st.session_state.inning = 1
+if "top" not in st.session_state:
+    st.session_state.top = True
+if "scoreboard" not in st.session_state:
+    st.session_state.scoreboard = {"top": [0]*9, "bottom": [0]*9}
 
-st.title("⚾ シンプル野球ゲーム")
+st.title("⚾ ナイスベースボール")
+
+half = "表" if st.session_state.top else "裏"
+st.subheader(f"{st.session_state.inning}回{half}")
+
+st.write("塁:", st.session_state.bases)
+st.write("アウト:", st.session_state.outs)
+
+# --- ここにバッティング確率をセット ---
+batting = ["hit", "two_base", "three_base", "home_run", "out"]
+weights = [0.25, 0.1, 0.03, 0.07, 0.55
 
 # --- ボタンを押して打席に立つ ---
 if st.button("▶ 打席に立つ"):
