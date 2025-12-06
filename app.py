@@ -92,7 +92,53 @@ if st.session_state.outs >= 3:
     st.session_state.score = 0
 
 
-# --- スコア表示 ---
-st.write("### スコアボード")
-st.write("表 :", st.session_state.scoreboard["top"])
-st.write("裏 :", st.session_state.scoreboard["bottom"])
+# --- スコアボードを横並び表示 ---
+st.markdown("### スコアボード")
+
+# 回の番号
+innings = [str(i+1) for i in range(9)]
+top_scores = st.session_state.scoreboard["top"]
+bottom_scores = st.session_state.scoreboard["bottom"]
+
+html = """
+<style>
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 20px;
+}
+th, td {
+    border: 1px solid #444;
+    padding: 6px 10px;
+    text-align: center;
+}
+th {
+    background-color: #eee;
+}
+</style>
+
+<table>
+    <tr>
+        <th>回</th>
+"""
+
+# 回の番号を横に並べる
+for inn in innings:
+    html += f"<th>{inn}</th>"
+html += "</tr>"
+
+# 表
+html += "<tr><td>表</td>"
+for s in top_scores:
+    html += f"<td>{s}</td>"
+html += "</tr>"
+
+# 裏
+html += "<tr><td>裏</td>"
+for s in bottom_scores:
+    html += f"<td>{s}</td>"
+html += "</tr>"
+
+html += "</table>"
+
+st.markdown(html, unsafe_allow_html=True)
