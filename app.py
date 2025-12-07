@@ -123,9 +123,6 @@ top_total = sum([s if isinstance(s, int) else 0 for s in top_scores])
 bottom_total = sum([s if isinstance(s, int) else 0 for s in bottom_scores])
 
 
-top_total = sum(top_scores)
-bottom_total = sum(bottom_scores)
-
 html = """
 <style>
 table {
