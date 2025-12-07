@@ -59,20 +59,19 @@ def advance_runners(bases_to_move):
 if not st.session_state.waiting_batter:
     if st.button("▶ 打席に立つ"):
         st.session_state.waiting_batter = True
+        st.rerun()   # ← これが超重要！
 
 
 # ===============================
-# ② 打つ（結果が決まる）
+# ② 打つ
 # ===============================
 if st.session_state.waiting_batter:
     if st.button("⚾ 打つ"):
         result = random.choices(batting, weights=weights, k=1)[0]
         st.write(f"結果：{result}")
 
-        # --- 結果処理 ---
         if result == "out":
             st.session_state.outs += 1
-            st.write("アウト！")
         else:
             if result == "hit":
                 advance_runners(1)
@@ -83,8 +82,8 @@ if st.session_state.waiting_batter:
             elif result == "home_run":
                 advance_runners(4)
 
-        # 次の打者へ
         st.session_state.waiting_batter = False
+        st.rerun()   # ← ここも
 
 
 # ---- 3アウトでチェンジ処理 ----
