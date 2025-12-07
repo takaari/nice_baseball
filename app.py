@@ -11,7 +11,7 @@ if "inning" not in st.session_state:
 if "top" not in st.session_state:
     st.session_state.top = True  # True = 表, False = 裏
 if "scoreboard" not in st.session_state:
-    st.session_state.scoreboard = {"top": [0]*9, "bottom": [0]*9}
+    st.session_state.scoreboard = {"top": [""]*9, "bottom": [""]*9}
 if "score" not in st.session_state:
     st.session_state.score = 0   # 現在の攻撃側の得点（1イニング中）
 if "waiting_batter" not in st.session_state:
