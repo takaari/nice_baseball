@@ -13,12 +13,13 @@ if "top" not in st.session_state:
 if "scoreboard" not in st.session_state:
     st.session_state.scoreboard = {"top": [""]*9, "bottom": [""]*9}
 if "score" not in st.session_state:
-    st.session_state.score = 0   # 現在の攻撃側の得点（1イニング中）
+    st.session_state.score = 0
 if "waiting_batter" not in st.session_state:
-    st.session_state.waiting_batter = False  # これが二段階方式の鍵！
+    st.session_state.waiting_batter = False
 if "inning_started" not in st.session_state:
     st.session_state.inning_started = False
-
+if "result_message" not in st.session_state:
+    st.session_state.result_message = ""   # ← ★ 結果表示用
 
 
 # --- UI ---
@@ -59,7 +60,8 @@ def advance_runners(bases_to_move):
 if not st.session_state.waiting_batter:
     if st.button("▶ 打席に立つ"):
         st.session_state.waiting_batter = True
-        st.rerun()   # ← これが超重要！
+        st.session_state.result_message = ""   # ★ 新しい打席では消去
+        st.rerun()
 
 
 # ===============================
@@ -68,7 +70,16 @@ if not st.session_state.waiting_batter:
 if st.session_state.waiting_batter:
     if st.button("⚾ 打つ"):
         result = random.choices(batting, weights=weights, k=1)[0]
-        st.write(f"結果：{result}")
+
+        # ★ 結果メッセージ設定
+        messages = {
+            "hit": "ヒット！",
+            "two_base": "ツーベースヒット！",
+            "three_base": "スリーベースヒット！",
+            "home_run": "ホームラン！！",
+            "out": "アウト！",
+        }
+        st.session_state.result_message = messages[result]
 
         if result == "out":
             st.session_state.outs += 1
@@ -83,7 +94,19 @@ if st.session_state.waiting_batter:
                 advance_runners(4)
 
         st.session_state.waiting_batter = False
-        st.rerun()   # ← ここも
+        st.rerun()
+
+
+# ======= ★ 結果メッセージ（大きく表示） =======
+if st.session_state.result_message:
+    st.markdown(
+        f"""
+        <div style='font-size: 32px; font-weight: bold; text-align:center; color: #d00; margin: 15px 0;'>
+            {st.session_state.result_message}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 
 # ---- 3アウトでチェンジ処理 ----
@@ -106,10 +129,9 @@ if st.session_state.outs >= 3:
     st.session_state.bases = [False, False, False]
     st.session_state.score = 0
     st.session_state.waiting_batter = False
+    st.session_state.result_message = ""   # ★ チェンジ時にも消す
 
-    # ⭐ スコアボードを表示可能にする
     st.session_state.inning_started = True
-
 
 
 # --- スコアボードを横並び表示 ---
@@ -119,7 +141,6 @@ innings = [str(i+1) for i in range(9)]
 top_scores = st.session_state.scoreboard["top"]
 bottom_scores = st.session_state.scoreboard["bottom"]
 
-# ★ 空欄 "" は 0 とみなして合計
 top_total = sum([s if isinstance(s, int) else 0 for s in top_scores])
 bottom_total = sum([s if isinstance(s, int) else 0 for s in bottom_scores])
 
