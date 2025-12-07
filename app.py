@@ -119,8 +119,9 @@ if st.session_state.outs >= 3:
 st.markdown("### スコアボード")
 
 innings = [str(i+1) for i in range(9)]
-top_scores = st.session_state.scoreboard["top"]
-bottom_scores = st.session_state.scoreboard["bottom"]
+top_total = sum([s if isinstance(s, int) else 0 for s in top_scores])
+bottom_total = sum([s if isinstance(s, int) else 0 for s in bottom_scores])
+
 
 top_total = sum(top_scores)
 bottom_total = sum(bottom_scores)
