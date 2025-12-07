@@ -122,55 +122,9 @@ innings = [str(i+1) for i in range(9)]
 top_scores = st.session_state.scoreboard["top"]
 bottom_scores = st.session_state.scoreboard["bottom"]
 
-# --- スコアボードを横並び表示 ---
-st.markdown("### スコアボード")
-
-innings = [str(i+1) for i in range(9)]
-top_scores = st.session_state.scoreboard["top"]
-bottom_scores = st.session_state.scoreboard["bottom"]
-
-top_total = sum(top_scores)
-bottom_total = sum(bottom_scores)
-
-html = """
-<style>
-table {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 20px;
-}
-th, td {
-    border: 1px solid #444;
-    padding: 6px 10px;
-    text-align: center;
-}
-th {
-    background-color: #eee;
-}
-</style>
-
-<table>
-    <tr>
-        <th>回</th>
-"""
-
-for inn in innings:
-    html += f"<th>{inn}</th>"
-html += "<th>R</th></tr>"
-
-html += "<tr><td>表</td>"
-for s in top_scores:
-    html += f"<td>{s}</td>"
-html += f"<td><b>{top_total}</b></td></tr>"
-
-html += "<tr><td>裏</td>"
-for s in bottom_scores:
-    html += f"<td>{s}</td>"
-html += f"<td><b>{bottom_total}</b></td></tr>"
-
-html += "</table>"
-
-st.markdown(html, unsafe_allow_html=True)
+# ★ 空欄 "" は 0 とみなして合計
+top_total = sum([s if isinstance(s, int) else 0 for s in top_scores])
+bottom_total = sum([s if isinstance(s, int) else 0 for s in bottom_scores])
 
 html = """
 <style>
