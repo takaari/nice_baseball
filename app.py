@@ -16,6 +16,9 @@ if "score" not in st.session_state:
     st.session_state.score = 0   # 現在の攻撃側の得点（1イニング中）
 if "waiting_batter" not in st.session_state:
     st.session_state.waiting_batter = False  # これが二段階方式の鍵！
+if "inning_started" not in st.session_state:
+    st.session_state.inning_started = False
+
 
 
 # --- UI ---
@@ -90,67 +93,77 @@ if st.session_state.waiting_batter:
 if st.session_state.outs >= 3:
     st.write("チェンジ！")
 
+    # スコア反映
     if st.session_state.top:
         st.session_state.scoreboard["top"][st.session_state.inning - 1] = st.session_state.score
     else:
         st.session_state.scoreboard["bottom"][st.session_state.inning - 1] = st.session_state.score
 
+    # 回の進行
     st.session_state.top = not st.session_state.top
     if st.session_state.top:
         st.session_state.inning += 1
 
+    # 状態リセット
     st.session_state.outs = 0
     st.session_state.bases = [False, False, False]
     st.session_state.score = 0
     st.session_state.waiting_batter = False
 
+    # ⭐ スコアボードを表示可能にする
+    st.session_state.inning_started = True
 
-# --- スコアボードを横並び表示 ---
-st.markdown("### スコアボード")
 
-innings = [str(i+1) for i in range(9)]
-top_scores = st.session_state.scoreboard["top"]
-bottom_scores = st.session_state.scoreboard["bottom"]
 
-top_total = sum(top_scores)
-bottom_total = sum(bottom_scores)
+# --- スコアボードを横並び表示（チェンジになるまで非表示）---
+if st.session_state.inning_started:
 
-html = """
-<style>
-table {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 20px;
-}
-th, td {
-    border: 1px solid #444;
-    padding: 6px 10px;
-    text-align: center;
-}
-th {
-    background-color: #eee;
-}
-</style>
+    st.markdown("### スコアボード")
 
-<table>
-    <tr>
-        <th>回</th>
-"""
+    innings = [str(i+1) for i in range(9)]
+    top_scores = st.session_state.scoreboard["top"]
+    bottom_scores = st.session_state.scoreboard["bottom"]
 
-for inn in innings:
-    html += f"<th>{inn}</th>"
-html += "<th>R</th></tr>"
+    top_total = sum(top_scores)
+    bottom_total = sum(bottom_scores)
 
-html += "<tr><td>表</td>"
-for s in top_scores:
-    html += f"<td>{s}</td>"
-html += f"<td><b>{top_total}</b></td></tr>"
+    html = """
+    <style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 20px;
+    }
+    th, td {
+        border: 1px solid #444;
+        padding: 6px 10px;
+        text-align: center;
+    }
+    th {
+        background-color: #eee;
+    }
+    </style>
 
-html += "<tr><td>裏</td>"
-for s in bottom_scores:
-    html += f"<td>{s}</td>"
-html += f"<td><b>{bottom_total}</b></td></tr>"
+    <table>
+        <tr>
+            <th>回</th>
+    """
 
-html += "</table>"
+    for inn in innings:
+        html += f"<th>{inn}</th>"
+    html += "<th>R</th></tr>"
 
-st.markdown(html, unsafe_allow_html=True)
+    html += "<tr><td>表</td>"
+    for s in top_scores:
+        html += f"<td>{s}</td>"
+    html += f"<td><b>{top_total}</b></td></tr>"
+
+    html += "<tr><td>裏</td>"
+    for s in bottom_scores:
+        html += f"<td>{s}</td>"
+    html += f"<td><b>{bottom_total}</b></td></tr>"
+
+    html += "</table>"
+
+    st.markdown(html, unsafe_allow_html=True)
+
