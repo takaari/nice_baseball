@@ -14,6 +14,8 @@ if "scoreboard" not in st.session_state:
     st.session_state.scoreboard = {"top": [0]*9, "bottom": [0]*9}
 if "score" not in st.session_state:
     st.session_state.score = 0   # 現在の攻撃側の得点（1イニング中）
+if "waiting_batter" not in st.session_state:
+    st.session_state.waiting_batter = False  # これが二段階方式の鍵！
 
 
 # --- UI ---
@@ -31,65 +33,76 @@ batting = ["hit", "two_base", "three_base", "home_run", "out"]
 weights = [0.25, 0.1, 0.03, 0.07, 0.55]
 
 
-# --- ランナー進塁関数（重要） ---
+# --- ランナー進塁関数 ---
 def advance_runners(bases_to_move):
-    # ランナーを後ろから処理（上書き防止）
     for i in range(2, -1, -1):
         if st.session_state.bases[i]:
             new_pos = i + bases_to_move
             if new_pos >= 3:
-                # 得点
                 st.session_state.score += 1
             else:
                 st.session_state.bases[new_pos] = True
             st.session_state.bases[i] = False
 
-    # 打者の処理
-    if bases_to_move >= 4:   # ホームラン
+    if bases_to_move >= 4:
         st.session_state.score += 1
     else:
         st.session_state.bases[bases_to_move - 1] = True
 
 
-# --- 打席 ---
+# ===============================
+# ① 打席に立つ（結果は出さない）
+# ===============================
 if st.button("▶ 打席に立つ"):
+    st.session_state.waiting_batter = True
+    st.info("打者が打席に立ちました。『打つ』を押してください。")
 
-    result = random.choices(batting, weights=weights, k=1)[0]
-    st.write(f"結果：{result}")
 
-    if result == "out":
-        st.session_state.outs += 1
-        st.write("アウト！")
-    else:
-        if result == "hit":
-            advance_runners(1)
-        elif result == "two_base":
-            advance_runners(2)
-        elif result == "three_base":
-            advance_runners(3)
-        elif result == "home_run":
-            advance_runners(4)
+# ===============================
+# ② 打つ（このボタンで結果を決める）
+# ===============================
+if st.session_state.waiting_batter:
+
+    if st.button("⚾ 打つ"):
+        result = random.choices(batting, weights=weights, k=1)[0]
+        st.write(f"結果：{result}")
+
+        # --- 結果処理 ---
+        if result == "out":
+            st.session_state.outs += 1
+            st.write("アウト！")
+
+        else:
+            if result == "hit":
+                advance_runners(1)
+            elif result == "two_base":
+                advance_runners(2)
+            elif result == "three_base":
+                advance_runners(3)
+            elif result == "home_run":
+                advance_runners(4)
+
+        # 次の打者を待つ状態へ戻す
+        st.session_state.waiting_batter = False
 
 
 # ---- 3アウトでチェンジ処理 ----
 if st.session_state.outs >= 3:
     st.write("チェンジ！")
 
-    # スコアをスコアボードへ
     if st.session_state.top:
         st.session_state.scoreboard["top"][st.session_state.inning - 1] = st.session_state.score
     else:
         st.session_state.scoreboard["bottom"][st.session_state.inning - 1] = st.session_state.score
 
-    # 回の進行
     st.session_state.top = not st.session_state.top
-    if st.session_state.top:   # 裏 → 表に戻ったらイニング+1
+    if st.session_state.top:
         st.session_state.inning += 1
 
-    # 状態リセット
     st.session_state.outs = 0
     st.session_state.bases = [False, False, False]
     st.session_state.score = 0
+    st.session_state.waiting_batter = False
 
 
 # --- スコアボードを横並び表示 ---
@@ -99,7 +112,6 @@ innings = [str(i+1) for i in range(9)]
 top_scores = st.session_state.scoreboard["top"]
 bottom_scores = st.session_state.scoreboard["bottom"]
 
-# 合計（R）
 top_total = sum(top_scores)
 bottom_total = sum(bottom_scores)
 
@@ -125,20 +137,15 @@ th {
         <th>回</th>
 """
 
-# 回の番号を横に並べる
 for inn in innings:
     html += f"<th>{inn}</th>"
-
-# R 列
 html += "<th>R</th></tr>"
 
-# 表
 html += "<tr><td>表</td>"
 for s in top_scores:
     html += f"<td>{s}</td>"
 html += f"<td><b>{top_total}</b></td></tr>"
 
-# 裏
 html += "<tr><td>裏</td>"
 for s in bottom_scores:
     html += f"<td>{s}</td>"
