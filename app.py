@@ -115,55 +115,52 @@ if st.session_state.outs >= 3:
 
 
 
-# --- スコアボードを横並び表示（チェンジになるまで非表示）---
-if st.session_state.inning_started:
+# --- スコアボードを横並び表示 ---
+st.markdown("### スコアボード")
 
-    st.markdown("### スコアボード")
+innings = [str(i+1) for i in range(9)]
+top_scores = st.session_state.scoreboard["top"]
+bottom_scores = st.session_state.scoreboard["bottom"]
 
-    innings = [str(i+1) for i in range(9)]
-    top_scores = st.session_state.scoreboard["top"]
-    bottom_scores = st.session_state.scoreboard["bottom"]
+top_total = sum(top_scores)
+bottom_total = sum(bottom_scores)
 
-    top_total = sum(top_scores)
-    bottom_total = sum(bottom_scores)
+html = """
+<style>
+table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 20px;
+}
+th, td {
+    border: 1px solid #444;
+    padding: 6px 10px;
+    text-align: center;
+}
+th {
+    background-color: #eee;
+}
+</style>
 
-    html = """
-    <style>
-    table {
-        border-collapse: collapse;
-        width: 100%;
-        font-size: 20px;
-    }
-    th, td {
-        border: 1px solid #444;
-        padding: 6px 10px;
-        text-align: center;
-    }
-    th {
-        background-color: #eee;
-    }
-    </style>
+<table>
+    <tr>
+        <th>回</th>
+"""
 
-    <table>
-        <tr>
-            <th>回</th>
-    """
+for inn in innings:
+    html += f"<th>{inn}</th>"
+html += "<th>R</th></tr>"
 
-    for inn in innings:
-        html += f"<th>{inn}</th>"
-    html += "<th>R</th></tr>"
+html += "<tr><td>表</td>"
+for s in top_scores:
+    html += f"<td>{s}</td>"
+html += f"<td><b>{top_total}</b></td></tr>"
 
-    html += "<tr><td>表</td>"
-    for s in top_scores:
-        html += f"<td>{s}</td>"
-    html += f"<td><b>{top_total}</b></td></tr>"
+html += "<tr><td>裏</td>"
+for s in bottom_scores:
+    html += f"<td>{s}</td>"
+html += f"<td><b>{bottom_total}</b></td></tr>"
 
-    html += "<tr><td>裏</td>"
-    for s in bottom_scores:
-        html += f"<td>{s}</td>"
-    html += f"<td><b>{bottom_total}</b></td></tr>"
+html += "</table>"
 
-    html += "</table>"
-
-    st.markdown(html, unsafe_allow_html=True)
-
+st.markdown(html, unsafe_allow_html=True)
