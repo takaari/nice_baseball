@@ -9,7 +9,7 @@ if "bases" not in st.session_state:
 if "inning" not in st.session_state:
     st.session_state.inning = 1
 if "top" not in st.session_state:
-    st.session_state.top = True  # True = 表, False = 裏
+    st.session_state.top = True
 if "scoreboard" not in st.session_state:
     st.session_state.scoreboard = {"top": [""]*9, "bottom": [""]*9}
 if "score" not in st.session_state:
@@ -18,8 +18,8 @@ if "waiting_batter" not in st.session_state:
     st.session_state.waiting_batter = False
 if "inning_started" not in st.session_state:
     st.session_state.inning_started = False
-if "result_message" not in st.session_state:
-    st.session_state.result_message = ""   # ← ★ 結果表示用
+if "last_message" not in st.session_state:
+    st.session_state.last_message = ""
 
 
 # --- UI ---
@@ -27,6 +27,7 @@ st.title("⚾ ナイスベースボール")
 
 half = "表" if st.session_state.top else "裏"
 st.subheader(f"{st.session_state.inning}回{half}")
+
 
 # -----------------------------------
 # ⭐ ランナー画像の表示（追加）
@@ -36,7 +37,7 @@ img_path = f"images/base_{key}.jpg"
 st.image(img_path, width=400)
 # -----------------------------------
 
-st.write("塁:", st.session_state.bases)
+
 st.write("アウト:", st.session_state.outs)
 st.write("現在のイニング得点:", st.session_state.score)
 
@@ -68,7 +69,6 @@ def advance_runners(bases_to_move):
 if not st.session_state.waiting_batter:
     if st.button("▶ 打席に立つ"):
         st.session_state.waiting_batter = True
-        st.session_state.result_message = ""   # ★ 新しい打席では消去
         st.rerun()
 
 
@@ -77,18 +77,22 @@ if not st.session_state.waiting_batter:
 # ===============================
 if st.session_state.waiting_batter:
     if st.button("⚾ 打つ"):
+
         result = random.choices(batting, weights=weights, k=1)[0]
 
-        # ★ 結果メッセージ設定
-        messages = {
-            "hit": "ヒット！",
-            "two_base": "ツーベースヒット！",
-            "three_base": "スリーベースヒット！",
-            "home_run": "ホームラン！！",
-            "out": "アウト！",
-        }
-        st.session_state.result_message = messages[result]
+        # メッセージ保存（画面に出す用）
+        if result == "out":
+            st.session_state.last_message = "アウト！"
+        elif result == "hit":
+            st.session_state.last_message = "ヒット！"
+        elif result == "two_base":
+            st.session_state.last_message = "ツーベースヒット！"
+        elif result == "three_base":
+            st.session_state.last_message = "スリーベースヒット！"
+        elif result == "home_run":
+            st.session_state.last_message = "ホームラン！！"
 
+        # 結果処理
         if result == "out":
             st.session_state.outs += 1
         else:
@@ -105,16 +109,9 @@ if st.session_state.waiting_batter:
         st.rerun()
 
 
-# ======= ★ 結果メッセージ（大きく表示） =======
-if st.session_state.result_message:
-    st.markdown(
-        f"""
-        <div style='font-size: 32px; font-weight: bold; text-align:center; color: #d00; margin: 15px 0;'>
-            {st.session_state.result_message}
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+# --- 打撃結果を表示 ---
+if st.session_state.last_message:
+    st.info(st.session_state.last_message)
 
 
 # ---- 3アウトでチェンジ処理 ----
@@ -137,12 +134,10 @@ if st.session_state.outs >= 3:
     st.session_state.bases = [False, False, False]
     st.session_state.score = 0
     st.session_state.waiting_batter = False
-    st.session_state.result_message = ""   # ★ チェンジ時にも消す
-
-    st.session_state.inning_started = True
+    st.session_state.last_message = ""
 
 
-# --- スコアボードを横並び表示 ---
+# --- スコアボード ---
 st.markdown("### スコアボード")
 
 innings = [str(i+1) for i in range(9)]
