@@ -28,6 +28,14 @@ st.title("⚾ ナイスベースボール")
 half = "表" if st.session_state.top else "裏"
 st.subheader(f"{st.session_state.inning}回{half}")
 
+# -----------------------------------
+# ⭐ ランナー画像の表示（追加）
+# -----------------------------------
+key = "".join(["1" if b else "0" for b in st.session_state.bases])
+img_path = f"images/base_{key}.jpg"
+st.image(img_path, width=400)
+# -----------------------------------
+
 st.write("塁:", st.session_state.bases)
 st.write("アウト:", st.session_state.outs)
 st.write("現在のイニング得点:", st.session_state.score)
