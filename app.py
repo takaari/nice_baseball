@@ -221,3 +221,4 @@ html += f"<td><b>{bottom_total}</b></td></tr>"
 html += "</table>"
 
 st.markdown(html, unsafe_allow_html=True)
+
