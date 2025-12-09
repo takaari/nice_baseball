@@ -20,6 +20,8 @@ if "inning_started" not in st.session_state:
     st.session_state.inning_started = False
 if "last_message" not in st.session_state:
     st.session_state.last_message = ""
+if "last_result_icon" not in st.session_state:
+    st.session_state.last_result_icon = ""  # ← 追加（画像表示用）
 
 
 # --- UI ---
@@ -29,13 +31,39 @@ half = "表" if st.session_state.top else "裏"
 st.subheader(f"{st.session_state.inning}回{half}")
 
 
-# -----------------------------------
-# ⭐ ランナー画像の表示（追加）
-# -----------------------------------
+# ---------------------------------------------------------
+# ⭐ ランナー画像 ＋ 結果アイコンを重ねて表示（新機能）
+# ---------------------------------------------------------
 key = "".join(["1" if b else "0" for b in st.session_state.bases])
-img_path = f"images/base_{key}.jpg"
-st.image(img_path, width=400)
-# -----------------------------------
+runner_img = f"images/base_{key}.jpg"
+
+# 画像の HTML 合成
+if st.session_state.last_result_icon:
+    result_img = f"images/{st.session_state.last_result_icon}"
+
+    html_code = f"""
+    <div style="position: relative; display: inline-block;">
+        <img src="{runner_img}" width="400">
+        <img src="{result_img}" 
+             style="
+                position: absolute; 
+                top: 50%; 
+                left: 50%; 
+                transform: translate(-50%, -50%);
+                width: 180px;
+             ">
+    </div>
+    """
+else:
+    # 結果アイコンなし（通常表示）
+    html_code = f"""
+    <div style="position: relative; display: inline-block;">
+        <img src="{runner_img}" width="400">
+    </div>
+    """
+
+st.components.v1.html(html_code, height=450)
+# ---------------------------------------------------------
 
 
 st.write("アウト:", st.session_state.outs)
@@ -69,6 +97,7 @@ def advance_runners(bases_to_move):
 if not st.session_state.waiting_batter:
     if st.button("▶ 打席に立つ"):
         st.session_state.waiting_batter = True
+        st.session_state.last_result_icon = ""  # ← 結果アイコンを消す
         st.rerun()
 
 
@@ -80,17 +109,22 @@ if st.session_state.waiting_batter:
 
         result = random.choices(batting, weights=weights, k=1)[0]
 
-        # メッセージ保存（画面に出す用）
+        # メッセージ保存
         if result == "out":
             st.session_state.last_message = "アウト！"
+            st.session_state.last_result_icon = "OUT.png"
         elif result == "hit":
             st.session_state.last_message = "ヒット！"
+            st.session_state.last_result_icon = "1BH.png"
         elif result == "two_base":
             st.session_state.last_message = "ツーベースヒット！"
+            st.session_state.last_result_icon = "2BH.png"
         elif result == "three_base":
             st.session_state.last_message = "スリーベースヒット！"
+            st.session_state.last_result_icon = "3BH.png"
         elif result == "home_run":
             st.session_state.last_message = "ホームラン！！"
+            st.session_state.last_result_icon = "HR.png"
 
         # 結果処理
         if result == "out":
@@ -109,7 +143,7 @@ if st.session_state.waiting_batter:
         st.rerun()
 
 
-# --- 打撃結果を表示 ---
+# --- 打撃結果を表示（テキスト） ---
 if st.session_state.last_message:
     st.info(st.session_state.last_message)
 
@@ -135,6 +169,7 @@ if st.session_state.outs >= 3:
     st.session_state.score = 0
     st.session_state.waiting_batter = False
     st.session_state.last_message = ""
+    st.session_state.last_result_icon = ""  # ← 画像もクリア
 
 
 # --- スコアボード ---
