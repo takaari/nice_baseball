@@ -31,38 +31,47 @@ half = "表" if st.session_state.top else "裏"
 st.subheader(f"{st.session_state.inning}回{half}")
 
 
+import base64
+
+# 画像ファイルを Base64 に変換する関数
+def img_to_base64(path):
+    with open(path, "rb") as f:
+        return base64.b64encode(f.read()).decode()
+
 # ---------------------------------------------------------
-# ⭐ ランナー画像 ＋ 結果アイコンを重ねて表示（新機能）
+# ⭐ ランナー画像 ＋ 結果アイコンを重ねて表示（Base64対応版）
 # ---------------------------------------------------------
 key = "".join(["1" if b else "0" for b in st.session_state.bases])
-runner_img = f"images/base_{key}.jpg"
+runner_img_path = f"images/base_{key}.jpg"
 
-# 画像の HTML 合成
+runner_base64 = img_to_base64(runner_img_path)
+
 if st.session_state.last_result_icon:
-    result_img = f"images/{st.session_state.last_result_icon}"
+    result_img_path = f"images/{st.session_state.last_result_icon}"
+    result_base64 = img_to_base64(result_img_path)
 
     html_code = f"""
     <div style="position: relative; display: inline-block;">
-        <img src="{runner_img}" width="400">
-        <img src="{result_img}" 
-             style="
-                position: absolute; 
-                top: 50%; 
-                left: 50%; 
+        <img src="data:image/jpeg;base64,{runner_base64}" width="400">
+        <img src="data:image/png;base64,{result_base64}"
+            style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
                 transform: translate(-50%, -50%);
                 width: 180px;
-             ">
+            ">
     </div>
     """
 else:
-    # 結果アイコンなし（通常表示）
     html_code = f"""
     <div style="position: relative; display: inline-block;">
-        <img src="{runner_img}" width="400">
+        <img src="data:image/jpeg;base64,{runner_base64}" width="400">
     </div>
     """
 
 st.components.v1.html(html_code, height=450)
+
 # ---------------------------------------------------------
 
 
