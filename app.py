@@ -59,9 +59,9 @@ if st.session_state.change_flag:
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 80px;
+            font-size: 40px;
             font-weight: bold;
-            color: red;
+            color: white;
             font-family: 'Arial Rounded MT Bold', 'Hiragino Maru Gothic Pro', 'Yu Gothic', sans-serif;
             text-shadow: 3px 3px 6px #00000088;
         ">
