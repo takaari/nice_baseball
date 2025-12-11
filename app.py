@@ -153,8 +153,8 @@ if st.session_state.waiting_batter:
 
 
 # --- 打撃結果を表示（テキスト） ---
-if st.session_state.last_message:
-    st.info(st.session_state.last_message)
+# if st.session_state.last_message:
+#    st.info(st.session_state.last_message)
 
 
 # ---- 3アウトでチェンジ処理 ----
