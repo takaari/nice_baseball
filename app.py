@@ -22,6 +22,9 @@ if "last_message" not in st.session_state:
     st.session_state.last_message = ""
 if "last_result_icon" not in st.session_state:
     st.session_state.last_result_icon = ""  # ← 追加（画像表示用）
+if "change_flag" not in st.session_state:
+    st.session_state.change_flag = False
+
 
 
 # --- UI ---
@@ -33,26 +36,45 @@ st.subheader(f"{st.session_state.inning}回{half}")
 
 import base64
 
-# 画像ファイルを Base64 に変換する関数
+# 画像ファイルを Base64 に変換
 def img_to_base64(path):
     with open(path, "rb") as f:
         return base64.b64encode(f.read()).decode()
 
+
 # ---------------------------------------------------------
-# ⭐ ランナー画像 ＋ 結果アイコンを重ねて表示（Base64対応版）
+# ⭐ ランナー画像 ＋ 結果アイコン or チェンジ表示
 # ---------------------------------------------------------
 key = "".join(["1" if b else "0" for b in st.session_state.bases])
 runner_img_path = f"images/base_{key}.jpg"
-
 runner_base64 = img_to_base64(runner_img_path)
 
-if st.session_state.last_result_icon:
+overlay_html = ""
+
+# --- チェンジ時の中央テキスト表示 ---
+if st.session_state.change_flag:
+    overlay_html = """
+        <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80px;
+            font-weight: bold;
+            color: red;
+            font-family: 'Arial Rounded MT Bold', 'Hiragino Maru Gothic Pro', 'Yu Gothic', sans-serif;
+            text-shadow: 3px 3px 6px #00000088;
+        ">
+            チェンジ
+        </div>
+    """
+
+# --- 打撃結果アイコン表示 ---
+elif st.session_state.last_result_icon:
     result_img_path = f"images/{st.session_state.last_result_icon}"
     result_base64 = img_to_base64(result_img_path)
 
-    html_code = f"""
-    <div style="position: relative; display: inline-block;">
-        <img src="data:image/jpeg;base64,{runner_base64}" width="400">
+    overlay_html = f"""
         <img src="data:image/png;base64,{result_base64}"
             style="
                 position: absolute;
@@ -61,14 +83,16 @@ if st.session_state.last_result_icon:
                 transform: translate(-50%, -50%);
                 width: 180px;
             ">
-    </div>
     """
-else:
-    html_code = f"""
-    <div style="position: relative; display: inline-block;">
-        <img src="data:image/jpeg;base64,{runner_base64}" width="400">
-    </div>
-    """
+
+
+# --- HTML 全体を合体 ---
+html_code = f"""
+<div style="position: relative; display: inline-block;">
+    <img src="data:image/jpeg;base64,{runner_base64}" width="400">
+    {overlay_html}
+</div>
+"""
 
 st.components.v1.html(html_code, height=450)
 
@@ -160,6 +184,8 @@ if st.session_state.waiting_batter:
 # ---- 3アウトでチェンジ処理 ----
 if st.session_state.outs >= 3:
     st.write("チェンジ！")
+    st.session_state.change_flag = True
+
 
     # スコア反映
     if st.session_state.top:
