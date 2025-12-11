@@ -131,8 +131,9 @@ if not st.session_state.waiting_batter:
     if st.button("▶ 打席に立つ"):
         
         st.session_state.waiting_batter = True
-        st.session_state.last_result_icon = ""  # ← 結果アイコンを消す
         st.session_state.change_flag = False
+        st.session_state.last_result_icon = ""  # ← 結果アイコンを消す
+        
         st.rerun()
         
 
