@@ -24,7 +24,8 @@ if "last_result_icon" not in st.session_state:
     st.session_state.last_result_icon = ""  # ← 追加（画像表示用）
 if "change_flag" not in st.session_state:
     st.session_state.change_flag = False
-
+if "change_time" not in st.session_state:
+    st.session_state.change_time = 0
 
 
 # --- UI ---
@@ -74,16 +75,31 @@ elif st.session_state.last_result_icon:
     result_img_path = f"images/{st.session_state.last_result_icon}"
     result_base64 = img_to_base64(result_img_path)
 
-    overlay_html = f"""
-        <img src="data:image/png;base64,{result_base64}"
-            style="
+    import time
+
+overlay_html = ""
+
+# チェンジ時の中央テキスト表示（1秒間のみ）
+if st.session_state.change_flag:
+    elapsed = time.time() - st.session_state.change_time
+    if elapsed < 1.0:  # ★1秒の間だけ表示
+        overlay_html = """
+            <div style="
                 position: absolute;
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                width: 180px;
+                font-size: 50px;
+                font-weight: bold;
+                color: white;
+                font-family: 'Arial Rounded MT Bold', 'Hiragino Maru Gothic Pro', 'Yu Gothic', sans-serif;
+                text-shadow: 3px 3px 6px #00000088;
             ">
-    """
+                チェンジ
+            </div>
+        """
+    else:
+        st.session_state.change_flag = False   # ★1秒後に自動解除
 
 
 # --- HTML 全体を合体 ---
@@ -187,8 +203,9 @@ if st.session_state.waiting_batter:
 
 # ---- 3アウトでチェンジ処理 ----
 if st.session_state.outs >= 3:
-#    st.write("チェンジ！")
     st.session_state.change_flag = True
+    st.session_state.change_time = time.time()   # ★追加
+
 
 
     # スコア反映
