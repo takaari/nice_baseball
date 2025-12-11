@@ -132,8 +132,9 @@ if not st.session_state.waiting_batter:
         
         st.session_state.waiting_batter = True
         st.session_state.last_result_icon = ""  # ← 結果アイコンを消す
-        st.rerun()
         st.session_state.change_flag = False
+        st.rerun()
+        
 
 
 # ===============================
